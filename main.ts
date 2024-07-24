@@ -1,5 +1,4 @@
 import { createApp } from "vue";
-import "./style.css";
 import { createWebHashHistory, createRouter } from "vue-router";
 import { createBootstrap } from "bootstrap-vue-next";
 import "bootstrap/dist/css/bootstrap.css";
