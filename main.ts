@@ -1,5 +1,9 @@
 import { createApp } from "vue";
-import { createWebHashHistory, createRouter } from "vue-router";
+import {
+  createWebHashHistory,
+  createWebHistory,
+  createRouter,
+} from "vue-router";
 import { createBootstrap } from "bootstrap-vue-next";
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-vue-next/dist/bootstrap-vue-next.css";
@@ -18,7 +22,9 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: ["localhost", "127.0.0.1"].includes(window.location.hostname)
+    ? createWebHashHistory()
+    : createWebHistory(),
   routes,
 });
 
