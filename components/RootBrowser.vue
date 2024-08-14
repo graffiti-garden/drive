@@ -36,41 +36,48 @@ const tableEntryMap = new Map<TableKey, TableEntry>();
 const tableEntries: Ref<TableItem<TableEntry>[]> = ref([]);
 
 async function refresh() {
-    for (const pod of await gf.podManager.getPods(webId, { fetch })) {
-        try {
-            for await (const orphan of gf.listOrphans(pod, { fetch })) {
-                const key = { name: orphan.name, type: "object" } as const;
-                if (orphan.tombstone) {
-                    if (tableEntryMap.has(key)) {
-                        tableEntryMap.delete(key);
-                    }
-                } else {
-                    tableEntryMap.set(key, {
-                        name: orphan.name,
-                        lastModified: orphan.lastModified,
-                        pod,
-                        type: "object",
-                    });
-                }
+    for await (const result of gf.listOrphans({ fetch, webId })) {
+        if (result.error === true) {
+            console.error(result.message);
+            continue;
+        }
+        const orphan = result.value;
+
+        const key = { name: orphan.name, type: "object" } as const;
+        if (orphan.tombstone) {
+            if (tableEntryMap.has(key)) {
+                tableEntryMap.delete(key);
             }
-            for await (const channel of gf.listChannels(pod, { fetch })) {
-                const key = { name: channel.channel, type: "channel" } as const;
-                if (channel.count <= 0) {
-                    if (tableEntryMap.has(key)) {
-                        tableEntryMap.delete(key);
-                    }
-                } else {
-                    tableEntryMap.set(key, {
-                        name: channel.channel,
-                        lastModified: channel.lastModified,
-                        pod,
-                        type: "channel",
-                        count: channel.count,
-                    });
-                }
+        } else {
+            tableEntryMap.set(key, {
+                name: orphan.name,
+                lastModified: orphan.lastModified,
+                pod: orphan.pod,
+                type: "object",
+            });
+        }
+    }
+
+    for await (const result of gf.listChannels({ fetch, webId })) {
+        if (result.error === true) {
+            console.error(result.message);
+            continue;
+        }
+        const channel = result.value;
+
+        const key = { name: channel.channel, type: "channel" } as const;
+        if (channel.count <= 0) {
+            if (tableEntryMap.has(key)) {
+                tableEntryMap.delete(key);
             }
-        } catch (e) {
-            console.error(e);
+        } else {
+            tableEntryMap.set(key, {
+                name: channel.channel,
+                lastModified: channel.lastModified,
+                pod: channel.pod,
+                type: "channel",
+                count: channel.count,
+            });
         }
     }
 
@@ -123,7 +130,7 @@ const perPage = 20;
             </RouterLink>
             <RouterLink
                 v-else-if="item.type === 'channel'"
-                :to="`/channel/${item.name}`"
+                :to="`/channel/${encodeURIComponent(item.name)}`"
                 >{{ item.name }}</RouterLink
             >
         </template>

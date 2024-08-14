@@ -20,12 +20,22 @@ watch(
         channel.value = newChannel;
         objects.clear();
 
-        const iterator = gf.query([newChannel], graffitiPod, {
+        const iterator = gf.query([newChannel], {
+            pods: [graffitiPod],
             fetch,
         });
 
-        for await (const object of iterator) {
-            objects.set(object.name, object);
+        for await (const result of iterator) {
+            if (result.error == true) {
+                console.error(result.message);
+            } else {
+                const object = result.value;
+                if (object.tombstone) {
+                    objects.delete(object.name);
+                } else {
+                    objects.set(object.name, object);
+                }
+            }
         }
     },
     {

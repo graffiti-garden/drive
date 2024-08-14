@@ -19,7 +19,7 @@
     "vite": "^5.1.4"
   },
   "dependencies": {
-    "@graffiti-garden/client-core": "^0.0.1",
+    "@graffiti-garden/client-core": "^0.0.6",
     "@inrupt/solid-client-authn-browser": "^2.2.4",
     "bootstrap": "^5.3.3",
     "bootstrap-vue-next": "^0.24.1",
